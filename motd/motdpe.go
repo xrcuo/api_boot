@@ -1,4 +1,4 @@
-package motdpe
+package motd
 
 import (
 	"encoding/hex"
