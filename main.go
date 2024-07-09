@@ -1,13 +1,17 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
-	"github.com/xrcuo/api_boot/psutil"
+	"github.com/xrcuo/api_boot/motd"
 )
 
 func main() {
-	logrus.Info("CPU: ", psutil.CpuPercent())
-	logrus.Info("Memory: ", psutil.DiskPercent())
-	logrus.Info("Disk: ", psutil.MemPercent())
-
+	Host := "103.40.13.47:20002"
+	data, err := motd.MotdBE(Host)
+	if err != nil {
+		fmt.Println(err)
+	}
+	logrus.Info(data)
 }

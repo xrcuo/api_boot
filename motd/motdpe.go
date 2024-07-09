@@ -26,6 +26,8 @@ type MotdBEInfo struct {
 	Ip        string `json:"ip"`         //服务器IP
 	Area      string `json:"area"`       //服务器区域
 	Text      string `json:"text"`       //随机一言
+	Ipv4      string `json:"ipv4"`       //服务器IPv4
+	Ipv6      string `json:"ipv6"`       //服务器IPv6
 }
 
 // MotdBE 获取BE服务器信息
@@ -91,6 +93,8 @@ func MotdBE(Host string) (*MotdBEInfo, error) {
 			Ip:        Z.Ip,
 			Area:      Z.Area,
 			Text:      W.Text,
+			Ipv4:      MotdData[10],
+			Ipv6:      MotdData[11],
 		}
 		return MotdInfo, nil
 	}
