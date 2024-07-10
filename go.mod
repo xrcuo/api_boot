@@ -2,10 +2,7 @@ module github.com/xrcuo/api_boot
 
 go 1.22
 
-require (
-	github.com/shirou/gopsutil/v4 v4.24.6
-	github.com/sirupsen/logrus v1.9.3
-)
+require github.com/shirou/gopsutil/v4 v4.24.6
 
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
