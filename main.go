@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	Host := "icedou.x3322.net:19136"
+	Host := ""
 	data, err := motd.MotdBE(Host)
 	if err != nil {
 		fmt.Println(err)
