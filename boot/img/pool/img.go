@@ -15,7 +15,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	"github.com/FloatTech/floatbox/web"
-	"github.com/xrcuo/api_boot/ctxext"
+	"github.com/xrcuo/api_boot/boot/ctxext"
 )
 
 const cacheurl = "https://gchat.qpic.cn/gchatpic_new//%s/0"

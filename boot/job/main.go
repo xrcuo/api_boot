@@ -23,8 +23,8 @@ import (
 	"github.com/FloatTech/floatbox/process"
 	"github.com/FloatTech/floatbox/web"
 
-	"github.com/xrcuo/api_boot/control"
-	"github.com/xrcuo/api_boot/vevent"
+	"github.com/xrcuo/api_boot/boot/control"
+	"github.com/xrcuo/api_boot/boot/vevent"
 )
 
 var (

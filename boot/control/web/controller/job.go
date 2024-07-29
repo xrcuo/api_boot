@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/xrcuo/api_boot/control/web/types"
-	"github.com/xrcuo/api_boot/job"
+	"github.com/xrcuo/api_boot/boot/control/web/types"
+	"github.com/xrcuo/api_boot/boot/job"
 )
 
 // JobList 任务列表

@@ -15,9 +15,9 @@ import (
 	webui "github.com/FloatTech/ZeroBot-Plugin-Webui"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	"github.com/xrcuo/api_boot/control/web/controller"
-	"github.com/xrcuo/api_boot/control/web/model"
-	"github.com/xrcuo/api_boot/control/web/router"
+	"github.com/xrcuo/api_boot/boot/control/web/controller"
+	"github.com/xrcuo/api_boot/boot/control/web/model"
+	"github.com/xrcuo/api_boot/boot/control/web/router"
 )
 
 var (

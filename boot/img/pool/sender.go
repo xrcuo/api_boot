@@ -8,7 +8,7 @@ import (
 
 	"github.com/FloatTech/floatbox/file"
 
-	"github.com/xrcuo/api_boot/ctxext"
+	"github.com/xrcuo/api_boot/boot/ctxext"
 )
 
 // SendImageFromPool ...

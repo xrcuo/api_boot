@@ -6,9 +6,9 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/xrcuo/api_boot/control/web/controller"
-	_ "github.com/xrcuo/api_boot/control/web/docs" // swagger数据
-	"github.com/xrcuo/api_boot/control/web/middleware"
+	"github.com/xrcuo/api_boot/boot/control/web/controller"
+	_ "github.com/xrcuo/api_boot/boot/control/web/docs" // swagger数据
+	"github.com/xrcuo/api_boot/boot/control/web/middleware"
 )
 
 // SetRouters 创建路由

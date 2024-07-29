@@ -22,10 +22,10 @@ import (
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 
-	"github.com/xrcuo/api_boot/control"
-	"github.com/xrcuo/api_boot/control/web/middleware"
-	"github.com/xrcuo/api_boot/control/web/model"
-	"github.com/xrcuo/api_boot/control/web/types"
+	"github.com/xrcuo/api_boot/boot/control"
+	"github.com/xrcuo/api_boot/boot/control/web/middleware"
+	"github.com/xrcuo/api_boot/boot/control/web/model"
+	"github.com/xrcuo/api_boot/boot/control/web/types"
 )
 
 var (

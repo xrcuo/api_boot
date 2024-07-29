@@ -18,7 +18,7 @@ import (
 
 	"github.com/FloatTech/rendercard"
 
-	"github.com/xrcuo/api_boot/img/text"
+	"github.com/xrcuo/api_boot/boot/img/text"
 )
 
 const (
