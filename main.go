@@ -3,14 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/xrcuo/api_boot/motd"
+	"github.com/xrcuo/api_boot/YiYan"
 )
 
 func main() {
-	Host := ""
-	data, err := motd.MotdBE(Host)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(data)
+	W, _ := YiYan.GetYiYan()
+	fmt.Println(W.Text)
 }

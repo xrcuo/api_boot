@@ -163,6 +163,7 @@ func MotdJava(Host string) (MotdJavaInfo, error) {
 	MotdInfo.Sample = resp.Players.Sample
 	MotdInfo.Favicon = resp.Favicon
 	MotdInfo.Delay = time2 - time1 //计算延迟
+
 	return MotdInfo, nil
 }
 

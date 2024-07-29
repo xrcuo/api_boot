@@ -8,7 +8,7 @@ import (
 )
 
 func TestBE(t *testing.T) {
-	Host := ""
+	Host := "110.42.98.150:46666"
 
 	Data, err := MotdBE(Host)
 	if err != nil {

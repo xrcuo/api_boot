@@ -103,8 +103,8 @@ func MotdBE(Host string) (*MotdBEInfo, error) {
 	MOTD2 := MotdData[7]           // 服务器MOTD line 2
 	GameMode := MotdData[8]        // 游戏模式
 	// GameModeNumeric := MotdData[9]                   // 游戏模式数字
-	Ipv4 := MotdData[10]
-	Ipv6 := MotdData[11]
+	Ipv4 := MotdData[10] // 服务器IPv4
+	Ipv6 := MotdData[11] // 服务器IPv6
 
 	// 转换数据
 	ProtocolVersionInt, err := strconv.Atoi(ProtocolVersion)
