@@ -29,6 +29,7 @@ require (
 	github.com/swaggo/swag v1.8.10
 	github.com/tidwall/gjson v1.14.4
 	github.com/wdvxdr1123/ZeroBot v1.7.5-0.20240505070304-562ffeb33dcd
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

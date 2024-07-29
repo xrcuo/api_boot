@@ -1,0 +1,26 @@
+connectgoisclient : true #是否以正向Ws的连接模式连接go-cqhttp
+websocket: 
+  server:
+    address: "127.0.0.1"
+    port: 3001
+    token: ""
+  serverurl:
+    coreurl: "0.0.0.0"
+    port: 6700
+    token: ""
+    connectwaitn: 16
+nickname: # 昵称，首个显示在日志中
+  - "喵喵"   
+  - "幼喵园" 
+superusers: # 管理员账号
+  - 836447856  
+commandprefix: "/" # 指令前缀
+only: "少女祈祷中......\n查什么查，别查了..." 
+
+webui:                # WebUI 配置
+  flags: false
+  url: "0.0.0.0:3000" # WebUI 链接
+
+log:
+  flags: false
+  logpath: "./logs/log"

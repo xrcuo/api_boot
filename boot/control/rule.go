@@ -93,6 +93,7 @@ func init() {
 				logrus.Infoln("[control] 获取到当前设置的服务列表显示行数为:", lnperpg)
 			}
 		}
+
 	}
 	zero.OnCommandGroup([]string{
 		"响应", "response", "沉默", "silence",
