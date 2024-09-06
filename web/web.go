@@ -92,7 +92,12 @@ func Ltml() {
 		c.JSON(http.StatusOK, speeds)
 	})
 
-	router.Run(":8080")
+	// 在后台启动 Web 服务器
+	go func() {
+		if err := router.Run(":8080"); err != nil {
+			fmt.Println("启动 Web 服务器失败:", err)
+		}
+	}()
 }
 
 // 定时更新系统信息
