@@ -53,7 +53,6 @@ func Ltml() {
 	router := gin.Default()
 
 	templ := template.Must(template.ParseFS(templates, "templates/*"))
-	//htmlTempl := template.Must(template.New("html").ParseFS(templates, "templates/index.html"))
 	router.SetHTMLTemplate(templ)
 
 	// 启动 goroutine 定时更新系统信息和网络速度信息
@@ -81,10 +80,15 @@ func Ltml() {
 	})
 
 	router.GET("/speed", func(c *gin.Context) {
+		infoMutex.RLock()
+		defer infoMutex.RUnlock()
+
+		// 使用更有效的方式构建 speeds 切片
 		speeds := make([]NetworkSpeed, 0, len(speedCache))
 		for _, speed := range speedCache {
 			speeds = append(speeds, speed)
 		}
+
 		c.JSON(http.StatusOK, speeds)
 	})
 
@@ -132,6 +136,8 @@ func updateNetworkSpeed() {
 	// 获取初始网络接口统计信息
 	prevCounters, _ := net.IOCounters(true)
 
+	// 在循环外部创建 speeds 切片
+	speeds := make([]NetworkSpeed, 0, len(speedCache))
 	for range ticker.C {
 		// 获取当前网络接口统计信息
 		currCounters, err := net.IOCounters(true)
@@ -142,6 +148,9 @@ func updateNetworkSpeed() {
 
 		// 遍历网络接口，更新速度信息
 		infoMutex.Lock()
+		// 重置 speeds 切片的长度
+		speeds = speeds[:0]
+
 		for i, counter := range currCounters {
 			if i < len(prevCounters) {
 				// 计算速度差值
@@ -152,24 +161,24 @@ func updateNetworkSpeed() {
 				kbpsRecv := bytesRecv * 8 / 1024
 				kbpsSent := bytesSent * 8 / 1024
 
-				// 从 speedCache 中获取现有的 NetworkSpeed 对象
-				speed, ok := speedCache[counter.Name]
-				if !ok {
-					// 如果不存在，则创建新的 NetworkSpeed 对象
-					speed = NetworkSpeed{
-						Name: counter.Name,
-					}
-				}
-				// 累加速度值
-				speed.BytesRecv += kbpsRecv
-				speed.BytesSent += kbpsSent
-				// 更新 speedCache
-				speedCache[counter.Name] = speed
+				// 使用 append 方法添加速度信息
+				speeds = append(speeds, NetworkSpeed{
+					Name:      counter.Name,
+					BytesRecv: kbpsRecv,
+					BytesSent: kbpsSent,
+				})
 			}
 		}
+
+		speedCache = make(map[string]NetworkSpeed) // 清空 speedCache
+		for _, speed := range speeds {
+			speedCache[speed.Name] = speed
+		}
+
 		infoMutex.Unlock()
+		prevCounters = currCounters
 
 		// 更新之前的网络接口统计信息
-		prevCounters = currCounters
+
 	}
 }
