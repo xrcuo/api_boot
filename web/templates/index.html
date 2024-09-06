@@ -94,6 +94,11 @@
 
         // 格式化速度值
         function formatSpeed(bytes, unit) {
+            // 如果字节数为 0，则直接返回 0
+            if (bytes === 0) {
+                return "0 " + unit;
+            }
+
             var speed;
             if (unit === "mbps") {
                 speed = bytes * 8 / 1000 / 1000; // Mbps
@@ -102,6 +107,7 @@
             }
             return speed.toFixed(2) + " " + unit;
         }
+
     </script>
 </body>
 

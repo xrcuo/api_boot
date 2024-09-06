@@ -141,20 +141,33 @@ func updateNetworkSpeed() {
 		}
 
 		// 遍历网络接口，更新速度信息
+		infoMutex.Lock()
 		for i, counter := range currCounters {
 			if i < len(prevCounters) {
 				// 计算速度差值
 				bytesRecv := counter.BytesRecv - prevCounters[i].BytesRecv
 				bytesSent := counter.BytesSent - prevCounters[i].BytesSent
 
-				// 更新速度缓存
-				speedCache[counter.Name] = NetworkSpeed{
-					Name:      counter.Name,
-					BytesRecv: bytesRecv,
-					BytesSent: bytesSent,
+				// 转换为 kbps
+				kbpsRecv := bytesRecv * 8 / 1024
+				kbpsSent := bytesSent * 8 / 1024
+
+				// 从 speedCache 中获取现有的 NetworkSpeed 对象
+				speed, ok := speedCache[counter.Name]
+				if !ok {
+					// 如果不存在，则创建新的 NetworkSpeed 对象
+					speed = NetworkSpeed{
+						Name: counter.Name,
+					}
 				}
+				// 累加速度值
+				speed.BytesRecv += kbpsRecv
+				speed.BytesSent += kbpsSent
+				// 更新 speedCache
+				speedCache[counter.Name] = speed
 			}
 		}
+		infoMutex.Unlock()
 
 		// 更新之前的网络接口统计信息
 		prevCounters = currCounters
