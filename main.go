@@ -1,12 +1,8 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/xrcuo/api_boot/YiYan"
-)
+import "github.com/xrcuo/api_boot/web"
 
 func main() {
-	W, _ := YiYan.GetYiYan()
-	fmt.Println(W.Text)
+	web.Ltml()
+
 }

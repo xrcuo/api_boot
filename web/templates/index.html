@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>系统监控</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>系统监控</h1>
+
+    <h2>CPU 使用率: <span id="cpu-percent"></span>%</h2>
+    <h2>内存使用率: <span id="memory-used"></span></h2>
+    <h2>硬盘使用率: <span id="disk-used"></span></h2>
+
+    <h2>网络接口</h2>
+    <table id="network-interfaces">
+        <thead>
+            <tr>
+                <th>接口名称</th>
+                <th>下载速度 ({{.SpeedUnit}})</th>
+                <th>上传速度 ({{.SpeedUnit}})</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        $(document).ready(function () {
+            setInterval(updateSystemInfo, 1000);
+            setInterval(updateNetworkSpeed, 1000);
+        });
+
+        function updateSystemInfo() {
+            $.getJSON("/system_info", function (data) {
+                $("#cpu-percent").text(data.cpuPercent.toFixed(2));
+                $("#memory-used").text(data.memoryUsed.toFixed(2) + "%");
+                $("#disk-used").text(data.diskUsed.toFixed(2) + "%");
+            });
+        }
+
+        function updateNetworkSpeed() {
+            // 获取速度单位
+            var speedUnit = "{{.SpeedUnit}}";
+
+            // 发送 AJAX 请求获取网络速度信息
+            $.getJSON("/speed", function (data) {
+                // 清空表格内容
+                $("#network-interfaces tbody").empty();
+
+                // 遍历网络接口数据
+                $.each(data, function (index, speed) {
+                    // 格式化速度值
+                    var downSpeed = formatSpeed(speed.BytesRecv, speedUnit);
+                    var upSpeed = formatSpeed(speed.BytesSent, speedUnit);
+
+                    // 添加新行到表格中
+                    $("#network-interfaces tbody").append("<tr><td>" + speed.Name + "</td><td>" + downSpeed + "</td><td>" + upSpeed + "</td></tr>");
+                });
+            });
+        }
+
+        // 格式化速度值
+        function formatSpeed(bytes, unit) {
+            var speed;
+            if (unit === "mbps") {
+                speed = bytes * 8 / 1000 / 1000; // Mbps
+            } else {
+                speed = bytes * 8 / 1000; // Kbps
+            }
+            return speed.toFixed(2) + " " + unit;
+        }
+    </script>
+
+
+
+</body>
+
+</html>
