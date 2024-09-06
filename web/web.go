@@ -20,9 +20,17 @@ var templates embed.FS
 
 // 定义一个结构体存储系统信息
 type SystemInfo struct {
-	CPUPercent float64 `json:"cpuPercent"`
-	MemoryUsed float64 `json:"memoryUsed"`
-	DiskUsed   float64 `json:"diskUsed"`
+	CPUPercent float64     `json:"cpuPercent"`
+	MemoryUsed float64     `json:"memoryUsed"`
+	DiskInfos  []*DiskInfo `json:"diskInfos"`
+}
+
+// 定义一个结构体存储硬盘信息
+type DiskInfo struct {
+	MountPoint  string  `json:"mountPoint"`
+	Total       uint64  `json:"total"` // 总容量，单位：GB
+	Used        uint64  `json:"used"`  // 已用容量，单位：GB
+	UsedPercent float64 `json:"usedPercent"`
 }
 
 // 定义一个结构体存储网络速度信息
@@ -92,22 +100,24 @@ func updateSystemInfo() {
 		// 获取内存信息
 		memory, _ := mem.VirtualMemory()
 
-		// 获取硬盘使用率
+		// 获取硬盘信息
 		partitions, _ := disk.Partitions(false)
+		diskInfos := make([]*DiskInfo, 0, len(partitions))
 		for _, partition := range partitions {
-			if partition.Mountpoint == "/" { // 获取根分区的使用率
-				usage, _ := disk.Usage(partition.Mountpoint)
-				infoMutex.Lock()
-				systemInfo.DiskUsed = usage.UsedPercent
-				infoMutex.Unlock()
-				break
-			}
+			usage, _ := disk.Usage(partition.Mountpoint)
+			diskInfos = append(diskInfos, &DiskInfo{
+				MountPoint:  partition.Mountpoint,
+				Total:       usage.Total / (1024 * 1024 * 1024), // GB
+				Used:        usage.Used / (1024 * 1024 * 1024),  // GB
+				UsedPercent: usage.UsedPercent,
+			})
 		}
 
 		// 更新系统信息
 		infoMutex.Lock()
 		systemInfo.CPUPercent = cpuPercent[0]
 		systemInfo.MemoryUsed = memory.UsedPercent
+		systemInfo.DiskInfos = diskInfos
 		infoMutex.Unlock()
 
 		time.Sleep(updateDelay)
