@@ -5,28 +5,21 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shirou/gopsutil/v4/net"
+	con "github.com/xrcuo/api_boot/config"
 )
 
 //go:embed templates
 var templates embed.FS
 
-// 使用 sync.Map 存储每个接口的网络速度信息和进程信息缓存
-var (
-	speedCache    = sync.Map{} // 使用 sync.Map 存储网络速度信息
-	processCache  = sync.Map{} // 使用 sync.Map 缓存进程信息
-	systemInfo    SystemInfo
-	infoMutex     sync.RWMutex
-	speedUnit     = "kbps" // 默认速度单位
-	updateDelay   = 1 * time.Second
-	cacheDuration = 5 * time.Second // 缓存持续时间
-)
-
 func Ltml() {
+	var (
+		up = time.Duration(con.Conf.Updatedelay) * time.Second
+		ca = time.Duration(con.Conf.Cacheduration) * time.Second
+	)
 	router := gin.Default()
 
 	templ := template.Must(template.ParseFS(templates, "templates/*"))
@@ -34,7 +27,7 @@ func Ltml() {
 
 	// 启动 goroutine 定时更新系统信息和网络速度信息
 	go func() {
-		ticker := time.NewTicker(updateDelay)
+		ticker := time.NewTicker(up)
 		defer ticker.Stop()
 
 		for range ticker.C {
@@ -45,7 +38,7 @@ func Ltml() {
 
 	// 启动 goroutine 定时清理缓存
 	go func() {
-		ticker := time.NewTicker(cacheDuration)
+		ticker := time.NewTicker(ca)
 		defer ticker.Stop()
 
 		for range ticker.C {
@@ -63,7 +56,7 @@ func Ltml() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"Interfaces": interfaces,
-			"SpeedUnit":  speedUnit,
+			"SpeedUnit":  con.Conf.Speedunit,
 		})
 	})
 

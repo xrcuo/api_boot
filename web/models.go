@@ -1,6 +1,17 @@
 package web
 
-import "time"
+import (
+	"sync"
+	"time"
+)
+
+// 使用 sync.Map 存储每个接口的网络速度信息和进程信息缓存
+var (
+	speedCache   = sync.Map{} // 使用 sync.Map 存储网络速度信息
+	processCache = sync.Map{} // 使用 sync.Map 缓存进程信息
+	systemInfo   SystemInfo
+	infoMutex    sync.RWMutex
+)
 
 // 定义一个结构体存储系统信息
 type SystemInfo struct {
