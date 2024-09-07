@@ -157,6 +157,10 @@ func updateNetworkSpeed() {
 
 	// 在循环外部创建 speeds 切片
 	speeds := make([]NetworkSpeed, 0, len(speedCache))
+
+	// 限制 speedCache 的容量，例如最多存储 100 个网络接口的信息
+	maxCacheSize := 100
+
 	for range ticker.C {
 		// 获取当前网络接口统计信息
 		currCounters, err := net.IOCounters(true)
@@ -189,16 +193,23 @@ func updateNetworkSpeed() {
 			}
 		}
 
-		speedCache = make(map[string]NetworkSpeed) // 清空 speedCache
+		// 如果 speedCache 的容量超过 maxCacheSize，则删除最旧的条目
+		if len(speedCache) > maxCacheSize {
+			for key := range speedCache {
+				delete(speedCache, key)
+				if len(speedCache) <= maxCacheSize {
+					break
+				}
+			}
+		}
+
+		// 更新 speedCache
 		for _, speed := range speeds {
 			speedCache[speed.Name] = speed
 		}
 
 		infoMutex.Unlock()
 		prevCounters = currCounters
-
-		// 更新之前的网络接口统计信息
-
 	}
 }
 
@@ -211,6 +222,9 @@ func getProcessInfo() ([]*ProcessInfo, error) {
 
 	processInfos := make([]*ProcessInfo, 0, len(processes))
 	for _, p := range processes {
+		// 使用 defer 释放进程资源
+		//defer p.Release()
+
 		cpuPercent, _ := p.CPUPercent()
 		memInfo, _ := p.MemoryInfo()
 		name, _ := p.Name() // 获取进程名
