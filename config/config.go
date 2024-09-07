@@ -18,7 +18,7 @@ var Conf *Config
 func genConfig() error {
 	sb := strings.Builder{}
 	sb.WriteString(defConfig)
-	err := os.WriteFile("boot.yaml", []byte(sb.String()), 0644)
+	err := os.WriteFile("webui.yaml", []byte(sb.String()), 0644)
 	if err != nil {
 		return err
 	}

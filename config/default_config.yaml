@@ -1,4 +1,8 @@
+speedunit: "MB/s"  # 速度单位，可选 "MB/s" 或 "KB/s"
+updatedelay: 1 # 更新延迟，单位秒
+cacheduration: 5 # 缓存持续时间，单位秒
+
 webui:                # WebUI 配置
-  flags: false
-  host: "0.0.0.0"
-  port: 3000
+  flags: false # 是否启用 WebUI
+  host: "0.0.0.0" # WebUI 监听地址
+  port: 3000 # WebUI 监听端口
