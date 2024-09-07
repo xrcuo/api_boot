@@ -1,9 +1,9 @@
 package web
 
 import (
-	"fmt"
 	"runtime/debug"
 
+	"github.com/nyancatda/AyaLog"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/mem"
@@ -13,7 +13,7 @@ import (
 func updateSystemInfo() {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("更新系统信息时发生错误:", r)
+			AyaLog.Info("System", "更新系统信息时发生错误:", r)
 			debug.PrintStack()
 		}
 	}()

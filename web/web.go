@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nyancatda/AyaLog"
 	"github.com/shirou/gopsutil/v4/net"
 	con "github.com/xrcuo/api_boot/config"
 )
@@ -15,10 +17,31 @@ import (
 //go:embed templates
 var templates embed.FS
 
+var conf *con.Config
+
 func Ltml() {
+	// 加载配置文件
+	con.Parse()
+	AyaLog.Info("System", "webui.yaml 加载成功")
+	conf = con.Conf
+
+	// 启用 WebUI
+	okk := conf.Webui.Flags
+	if okk != "false" {
+		AyaLog.Info("System", "Webui启动服务")
+		go Start()
+
+	} else {
+		AyaLog.Info("System", "Webui停止服务")
+	}
+
+}
+
+func Start() {
 	var (
-		up = time.Duration(con.Conf.Updatedelay) * time.Second
-		ca = time.Duration(con.Conf.Cacheduration) * time.Second
+		up = time.Duration(conf.Updatedelay) * time.Second
+		ca = time.Duration(conf.Cacheduration) * time.Second
+		//omain = fmt.Sprintf("%s:%d", conf.Webui.Host, conf.Webui.Port)
 	)
 	router := gin.Default()
 
@@ -56,7 +79,7 @@ func Ltml() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"Interfaces": interfaces,
-			"SpeedUnit":  con.Conf.Speedunit,
+			"SpeedUnit":  conf.Speedunit,
 		})
 	})
 
@@ -90,5 +113,10 @@ func Ltml() {
 		}
 		c.JSON(http.StatusOK, processInfos)
 	})
-	router.Run(":8080")
+	// 在后台启动 Web 服务器
+	go func() {
+		if err := router.Run(conf.Webui.Host + ":" + strconv.Itoa(conf.Webui.Port)); err != nil {
+			AyaLog.Error("System", err)
+		}
+	}()
 }

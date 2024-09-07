@@ -2,13 +2,11 @@ package web
 
 import (
 	"time"
-
-	con "github.com/xrcuo/api_boot/config"
 )
 
 // 清理缓存
 func cleanCache() {
-	var ca = time.Duration(con.Conf.Cacheduration) * time.Second
+	var ca = time.Duration(conf.Cacheduration) * time.Second
 	// 清理 speedCache
 	speedCache.Range(func(key, value interface{}) bool {
 		// 检查缓存项是否过期

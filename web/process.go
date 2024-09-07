@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/nyancatda/AyaLog"
 	"github.com/shirou/gopsutil/v4/process"
 )
 
@@ -12,7 +13,7 @@ import (
 func getProcessInfo() ([]*ProcessInfo, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("获取进程信息时发生错误:", r)
+			AyaLog.Info("System", "获取进程信息时发生错误:", r)
 			debug.PrintStack()
 		}
 	}()
@@ -41,7 +42,7 @@ func getProcessInfo() ([]*ProcessInfo, error) {
 		cpuPercent, _ := p.CPUPercent()
 		memInfo, err := p.MemoryInfo()
 		if err != nil {
-			fmt.Printf("获取进程 %d 的内存信息失败: %s\n", p.Pid, err)
+			AyaLog.Info("System", "获取进程 %d 的内存信息失败: %s\n", p.Pid, err)
 			continue
 		}
 		name, _ := p.Name()
