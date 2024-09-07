@@ -13,6 +13,7 @@ import (
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/shirou/gopsutil/v4/net"
+	"github.com/shirou/gopsutil/v4/process"
 )
 
 //go:embed templates
@@ -38,6 +39,14 @@ type NetworkSpeed struct {
 	Name      string
 	BytesRecv uint64
 	BytesSent uint64
+}
+
+// 定义一个结构体存储进程信息
+type ProcessInfo struct {
+	Pid        int32   `json:"pid"`
+	Name       string  `json:"name"`
+	CPUPercent float64 `json:"cpuPercent"`
+	MemoryUsed float32 `json:"memoryUsed"` // 内存使用量，单位：MB
 }
 
 // 使用 sync.Map 存储每个接口的网络速度信息
@@ -92,12 +101,17 @@ func Ltml() {
 		c.JSON(http.StatusOK, speeds)
 	})
 
-	// 在后台启动 Web 服务器
-	go func() {
-		if err := router.Run(":8080"); err != nil {
-			fmt.Println("启动 Web 服务器失败:", err)
+	router.GET("/processes", func(c *gin.Context) {
+		processInfos, err := getProcessInfo()
+		if err != nil {
+			c.String(http.StatusInternalServerError, fmt.Sprintf("获取进程信息失败: %s", err))
+			return
 		}
-	}()
+		c.JSON(http.StatusOK, processInfos)
+	})
+	router.Run(":8080")
+	// 在后台启动 Web 服务器
+
 }
 
 // 定时更新系统信息
@@ -186,4 +200,28 @@ func updateNetworkSpeed() {
 		// 更新之前的网络接口统计信息
 
 	}
+}
+
+// 获取进程信息
+func getProcessInfo() ([]*ProcessInfo, error) {
+	processes, err := process.Processes()
+	if err != nil {
+		return nil, fmt.Errorf("获取进程列表失败: %w", err)
+	}
+
+	processInfos := make([]*ProcessInfo, 0, len(processes))
+	for _, p := range processes {
+		cpuPercent, _ := p.CPUPercent()
+		memInfo, _ := p.MemoryInfo()
+		name, _ := p.Name() // 获取进程名
+
+		processInfos = append(processInfos, &ProcessInfo{
+			Pid:        p.Pid,
+			Name:       name,
+			CPUPercent: cpuPercent,
+			MemoryUsed: float32(memInfo.RSS) / (1024 * 1024), // 转换为 MB
+		})
+	}
+
+	return processInfos, nil
 }

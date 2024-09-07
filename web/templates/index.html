@@ -24,7 +24,7 @@
 
     <h2>CPU 使用率: <span id="cpu-percent"></span>%</h2>
     <h2>内存使用率: <span id="memory-used"></span></h2>
-    <h2>硬盘使用率: </h2>
+    <h2>硬盘信息</h2>
     <table id="disk-info">
         <thead>
             <tr>
@@ -37,7 +37,6 @@
         <tbody>
         </tbody>
     </table>
-
     <h2>网络接口</h2>
     <table id="network-interfaces">
         <thead>
@@ -51,10 +50,24 @@
         </tbody>
     </table>
 
+    <h2>进程信息</h2>
+    <table id="process-info">
+        <thead>
+            <tr>
+                <th>PID</th>
+                <th>进程名</th>
+                <th>CPU 使用率 (%)</th>
+                <th>内存使用 (MB)</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     <script>
         $(document).ready(function () {
             setInterval(updateSystemInfo, 1000);
             setInterval(updateNetworkSpeed, 1000);
+            setInterval(updateProcessInfo, 1000);
         });
 
         function updateSystemInfo() {
@@ -62,7 +75,7 @@
                 $("#cpu-percent").text(data.cpuPercent.toFixed(2));
                 $("#memory-used").text(data.memoryUsed.toFixed(2) + "%");
 
-                // 更新硬盘信息
+                // 更新硬盘信息表格
                 var diskInfoTbody = $("#disk-info tbody");
                 diskInfoTbody.empty();
                 $.each(data.diskInfos, function (index, disk) {
@@ -81,13 +94,28 @@
                 $("#network-interfaces tbody").empty();
 
                 // 遍历网络接口数据
-                $.each(data, function (index, speed) {
-                    // 格式化速度值
-                    var downSpeed = formatSpeed(speed.BytesRecv, speedUnit);
-                    var upSpeed = formatSpeed(speed.BytesSent, speedUnit);
+                for (var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        var speed = data[key];
 
-                    // 添加新行到表格中
-                    $("#network-interfaces tbody").append("<tr><td>" + speed.Name + "</td><td>" + downSpeed + "</td><td>" + upSpeed + "</td></tr>");
+                        // 格式化速度值
+                        var downSpeed = formatSpeed(speed.BytesRecv, speedUnit);
+                        var upSpeed = formatSpeed(speed.BytesSent, speedUnit);
+
+                        // 添加新行到表格中
+                        $("#network-interfaces tbody").append("<tr><td>" + speed.Name + "</td><td>" + downSpeed + "</td><td>" + upSpeed + "</td></tr>");
+                    }
+                }
+            });
+        }
+
+        function updateProcessInfo() {
+            $.getJSON("/processes", function (data) {
+                // 更新进程信息表格
+                var processInfoTbody = $("#process-info tbody");
+                processInfoTbody.empty();
+                $.each(data, function (index, process) {
+                    processInfoTbody.append("<tr><td>" + process.pid + "</td><td>" + process.name + "</td><td>" + process.cpuPercent.toFixed(2) + "</td><td>" + process.memoryUsed.toFixed(2) + "</td></tr>");
                 });
             });
         }
@@ -107,7 +135,6 @@
             }
             return speed.toFixed(2) + " " + unit;
         }
-
     </script>
 </body>
 
