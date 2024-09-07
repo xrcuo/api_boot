@@ -2,6 +2,10 @@ package con
 
 type (
 	Config struct {
-		Summary string
+		Webui struct {
+			Flags string
+			Host  string
+			Port  int
+		}
 	}
 )

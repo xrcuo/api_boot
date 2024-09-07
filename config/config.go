@@ -27,13 +27,13 @@ func genConfig() error {
 
 // 解析配置文件
 func Parse() {
-	content, err := os.ReadFile("boot.yaml")
+	content, err := os.ReadFile("webui.yaml")
 	if err != nil {
 		err = genConfig()
 		if err != nil {
-			panic("无法生成设置文件: boot.yaml, 请确认是否给足系统权限")
+			panic("无法生成设置文件: webui.yaml, 请确认是否给足系统权限")
 		}
-		logrus.Warn("未检测到 boot.yaml，已自动于同目录生成，请配置并重新启动")
+		logrus.Warn("未检测到 webui.yaml，已自动于同目录生成，请配置并重新启动")
 		logrus.Warn("将于 5 秒后退出...")
 		os.Exit(-1)
 	}
@@ -41,6 +41,6 @@ func Parse() {
 	Conf = &Config{}
 	err = yaml.Unmarshal(content, Conf)
 	if err != nil {
-		logrus.Fatal("解析 boot.yaml 失败，请检查格式、内容是否输入正确")
+		logrus.Fatal("解析 webui.yaml 失败，请检查格式、内容是否输入正确")
 	}
 }
