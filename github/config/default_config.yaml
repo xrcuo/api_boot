@@ -1,0 +1,7 @@
+repoowner: "" #仓库拥有者
+reponame: "" #仓库名称
+releaseasset: "" #版本文件的名称
+
+downloaddir: "" #下载目录
+extractdir: "" #解压到该目录
+checkintervainin: 10 #每隔10分钟检查一次
