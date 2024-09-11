@@ -3,6 +3,7 @@ module github.com/xrcuo/api_boot
 go 1.22
 
 require (
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/nyancatda/AyaLog v1.0.8
 	github.com/shirou/gopsutil/v4 v4.24.8

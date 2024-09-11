@@ -1,10 +1,8 @@
 package main
 
-import (
-	"github.com/xrcuo/api_boot/web"
-)
+import webw "github.com/xrcuo/api_boot/w"
 
 func main() {
-	web.Ltml()
+	webw.Ltml()
 
 }
