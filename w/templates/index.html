@@ -169,24 +169,24 @@
 
         // 更新 CPU 仪表盘
         function updateCPUGauge() {
-            $.getJSON("/system_info", function (data) {
-                const cpuUsage = data.CPUPercent;
-                const cpuGaugeArrow = document.getElementById('cpuGaugeArrow');
-                const cpuGaugeValue = document.getElementById('cpuGaugeValue');
-                cpuGaugeArrow.style.transform = `translateX(-50%) rotate(${cpuUsage * 1.8 - 90}deg)`;
-                cpuGaugeValue.textContent = `${cpuUsage.toFixed(1)}%`;
-            });
+            // 直接从页面上获取 CPU 使用率
+            const cpuUsage = parseFloat($("#cpu-percent").text());
+
+            const cpuGaugeArrow = document.getElementById('cpuGaugeArrow');
+            const cpuGaugeValue = document.getElementById('cpuGaugeValue');
+            cpuGaugeArrow.style.transform = `translateX(-50%) rotate(${cpuUsage * 1.8 - 90}deg)`;
+            cpuGaugeValue.textContent = `${cpuUsage.toFixed(1)}%`;
         }
 
         // 更新内存仪表盘
         function updateMemoryGauge() {
-            $.getJSON("/system_info", function (data) {
-                const memoryUsage = data.MemoryUsed;
-                const memoryGaugeArrow = document.getElementById('memoryGaugeArrow');
-                const memoryGaugeValue = document.getElementById('memoryGaugeValue');
-                memoryGaugeArrow.style.transform = `translateX(-50%) rotate(${memoryUsage * 1.8 - 90}deg)`;
-                memoryGaugeValue.textContent = `${memoryUsage.toFixed(1)}%`;
-            });
+            // 直接从页面上获取内存使用率
+            const memoryUsage = parseFloat($("#memory-used").text());
+
+            const memoryGaugeArrow = document.getElementById('memoryGaugeArrow');
+            const memoryGaugeValue = document.getElementById('memoryGaugeValue');
+            memoryGaugeArrow.style.transform = `translateX(-50%) rotate(${memoryUsage * 1.8 - 90}deg)`;
+            memoryGaugeValue.textContent = `${memoryUsage.toFixed(1)}%`;
         }
 
         function updateNetworkSpeed() {
