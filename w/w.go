@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"reflect"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -102,11 +103,10 @@ func Ltml() {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			cleanCache[NetworkSpeed](&speedCache, cacheDuration, NetworkSpeed.GetLastUpdated)
-			cleanCache[ProcessInfo](&processCache, cacheDuration, ProcessInfo.GetLastUpdated)
+			cleanCache[NetworkSpeed](&speedCache, cacheDuration)
+			cleanCache[ProcessInfo](&processCache, cacheDuration)
 		}
 	}()
-
 	router.GET("/", func(c *gin.Context) {
 		// 获取网络接口信息
 		interfaces, err := net.Interfaces()
@@ -198,7 +198,7 @@ func getPreviousNetworkSpeed(counterName string) (NetworkSpeed, bool) {
 
 	prevSpeedInfo, ok := prevCounter.(NetworkSpeed)
 	if !ok {
-		fmt.Printf("类型断言失败: %s\n", counterName)
+		fmt.Printf("类型断言失败: 预期类型 NetworkSpeed，实际类型 %T\n", prevCounter)
 		return NetworkSpeed{}, false
 	}
 
@@ -315,14 +315,24 @@ func getProcessInfo() ([]*ProcessInfo, error) {
 }
 
 // 清理缓存 (使用泛型函数)
-func cleanCache[T any](cache *sync.Map, cacheDuration time.Duration, getLastUpdated func(T) time.Time) {
+func cleanCache[T any](cache *sync.Map, cacheDuration time.Duration) {
 	cache.Range(func(key, value interface{}) bool {
 		item, ok := value.(T)
 		if !ok {
 			return true // 跳过非预期类型的条目
 		}
 
-		if time.Since(getLastUpdated(item)) > cacheDuration {
+		// 使用反射获取 GetLastUpdated 方法
+		method := reflect.ValueOf(item).MethodByName("GetLastUpdated")
+		if !method.IsValid() {
+			return true // 如果没有该方法，则跳过
+		}
+
+		// 调用 GetLastUpdated 方法获取最后更新时间
+		results := method.Call(nil)
+		lastUpdated := results[0].Interface().(time.Time)
+
+		if time.Since(lastUpdated) > cacheDuration {
 			cache.Delete(key)
 		}
 		return true
