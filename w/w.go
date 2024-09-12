@@ -48,6 +48,12 @@ type NetworkSpeed struct {
 	LastUpdated time.Time `json:"-"` // 添加 LastUpdated 字段
 }
 
+// 定义一个自定义错误类型
+type systemInfoError struct {
+	message string
+	cause   error
+}
+
 // 为 NetworkSpeed 添加 GetLastUpdated 方法
 func (ns NetworkSpeed) GetLastUpdated() time.Time {
 	return ns.LastUpdated
@@ -155,7 +161,7 @@ func Ltml() {
 }
 
 // 定时更新系统信息
-func updateSystemInfo() {
+func updateSystemInfo() error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("更新系统信息时发生错误:", r)
@@ -163,10 +169,10 @@ func updateSystemInfo() {
 		}
 	}()
 
+	var err error
 	cpuPercent, err := cpu.Percent(0, false)
 	if err != nil {
-		fmt.Println("获取 CPU 使用率失败:", err)
-		return
+		return &systemInfoError{message: "获取 CPU 使用率失败", cause: err}
 	}
 	memory, _ := mem.VirtualMemory()
 
@@ -187,6 +193,8 @@ func updateSystemInfo() {
 	systemInfo.MemoryUsed = memory.UsedPercent
 	systemInfo.DiskInfos = diskInfos
 	infoMutex.Unlock()
+
+	return nil
 }
 
 // 获取之前的网络接口统计信息
@@ -203,6 +211,11 @@ func getPreviousNetworkSpeed(counterName string) (NetworkSpeed, bool) {
 	}
 
 	return prevSpeedInfo, true
+}
+
+// 实现 error 接口
+func (e *systemInfoError) Error() string {
+	return fmt.Sprintf("%s: %v", e.message, e.cause)
 }
 
 // 定时更新网络速度信息
@@ -330,7 +343,15 @@ func cleanCache[T any](cache *sync.Map, cacheDuration time.Duration) {
 
 		// 调用 GetLastUpdated 方法获取最后更新时间
 		results := method.Call(nil)
-		lastUpdated := results[0].Interface().(time.Time)
+		if len(results) == 0 {
+			fmt.Println("GetLastUpdated 方法没有返回值")
+			return true
+		}
+		lastUpdated, ok := results[0].Interface().(time.Time)
+		if !ok {
+			fmt.Println("GetLastUpdated 方法返回值类型错误")
+			return true
+		}
 
 		if time.Since(lastUpdated) > cacheDuration {
 			cache.Delete(key)
