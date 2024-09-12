@@ -1,8 +1,10 @@
 package main
 
-import webw "github.com/xrcuo/api_boot/w"
+import "github.com/nyancatda/AyaLog"
 
 func main() {
-	webw.Ltml()
+	//("AyaLog is starting")
+	AyaLog.Yellow("AyaLog is starting")
+	//web.Ltml()
 
 }

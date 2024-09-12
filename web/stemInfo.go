@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	"github.com/nyancatda/AyaLog"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/mem"
@@ -13,7 +14,7 @@ import (
 func updateSystemInfo() error {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("更新系统信息时发生错误:", r)
+			AyaLog.Warning("更新系统信息时发生错误:", r)
 			debug.PrintStack()
 		}
 	}()
@@ -48,5 +49,6 @@ func updateSystemInfo() error {
 
 // 实现 error 接口
 func (e *systemInfoError) Error() string {
+	AyaLog.Warning("%s: %v", e.message, e.cause)
 	return fmt.Sprintf("%s: %v", e.message, e.cause)
 }

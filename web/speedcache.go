@@ -1,10 +1,11 @@
 package web
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/nyancatda/AyaLog"
 )
 
 // 清理缓存 (使用泛型函数)
@@ -24,12 +25,12 @@ func cleanCache[T any](cache *sync.Map, cacheDuration time.Duration) {
 		// 调用 GetLastUpdated 方法获取最后更新时间
 		results := method.Call(nil)
 		if len(results) == 0 {
-			fmt.Println("GetLastUpdated 方法没有返回值")
+			AyaLog.Warning("GetLastUpdated 方法没有返回值")
 			return true
 		}
 		lastUpdated, ok := results[0].Interface().(time.Time)
 		if !ok {
-			fmt.Println("GetLastUpdated 方法返回值类型错误")
+			AyaLog.Warning("GetLastUpdated 方法返回值类型错误")
 			return true
 		}
 

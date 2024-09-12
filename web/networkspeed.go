@@ -1,10 +1,10 @@
 package web
 
 import (
-	"fmt"
 	"runtime/debug"
 	"time"
 
+	"github.com/nyancatda/AyaLog"
 	"github.com/shirou/gopsutil/v4/net"
 )
 
@@ -12,14 +12,14 @@ import (
 func updateNetworkSpeed() {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("更新网络速度信息时发生错误:", r)
+			AyaLog.Warning("更新网络速度信息时发生错误:", r)
 			debug.PrintStack()
 		}
 	}()
 
 	currCounters, err := net.IOCounters(true)
 	if err != nil {
-		fmt.Println("获取网络接口统计信息失败:", err)
+		AyaLog.Warning("获取网络接口统计信息失败:", err)
 		return
 	}
 
@@ -33,7 +33,7 @@ func updateNetworkSpeed() {
 		// 使用类型断言获取 NetworkSpeed 对象
 		speedInfo, ok := speed.(NetworkSpeed)
 		if !ok {
-			fmt.Printf("类型断言失败: %s\n", counter.Name)
+			AyaLog.Warning("类型断言失败: %s\n", counter.Name)
 			continue
 		}
 
@@ -70,7 +70,7 @@ func getPreviousNetworkSpeed(counterName string) (NetworkSpeed, bool) {
 
 	prevSpeedInfo, ok := prevCounter.(NetworkSpeed)
 	if !ok {
-		fmt.Printf("类型断言失败: 预期类型 NetworkSpeed，实际类型 %T\n", prevCounter)
+		AyaLog.Warning("类型断言失败: 预期类型 NetworkSpeed，实际类型 %T\n", prevCounter)
 		return NetworkSpeed{}, false
 	}
 
