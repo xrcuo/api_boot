@@ -1,24 +1,28 @@
 package web
 
 import (
+	"fmt"
 	"runtime/debug"
 
-	"github.com/nyancatda/AyaLog"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
 // 定时更新系统信息
-func updateSystemInfo() {
+func updateSystemInfo() error {
 	defer func() {
 		if r := recover(); r != nil {
-			AyaLog.Info("System", "更新系统信息时发生错误:", r)
+			fmt.Println("更新系统信息时发生错误:", r)
 			debug.PrintStack()
 		}
 	}()
 
-	cpuPercent, _ := cpu.Percent(0, false)
+	var err error
+	cpuPercent, err := cpu.Percent(0, false)
+	if err != nil {
+		return &systemInfoError{message: "获取 CPU 使用率失败", cause: err}
+	}
 	memory, _ := mem.VirtualMemory()
 
 	partitions, _ := disk.Partitions(false)
@@ -38,4 +42,11 @@ func updateSystemInfo() {
 	systemInfo.MemoryUsed = memory.UsedPercent
 	systemInfo.DiskInfos = diskInfos
 	infoMutex.Unlock()
+
+	return nil
+}
+
+// 实现 error 接口
+func (e *systemInfoError) Error() string {
+	return fmt.Sprintf("%s: %v", e.message, e.cause)
 }

@@ -7,10 +7,13 @@ import (
 
 // 使用 sync.Map 存储每个接口的网络速度信息和进程信息缓存
 var (
-	speedCache   = sync.Map{} // 使用 sync.Map 存储网络速度信息
-	processCache = sync.Map{} // 使用 sync.Map 缓存进程信息
-	systemInfo   SystemInfo
-	infoMutex    sync.RWMutex
+	speedCache    = sync.Map{} // 使用 sync.Map 存储网络速度信息
+	processCache  = sync.Map{} // 使用 sync.Map 缓存进程信息
+	systemInfo    SystemInfo
+	infoMutex     sync.RWMutex
+	speedUnit     = "kbps" // 默认速度单位
+	updateDelay   = 1 * time.Second
+	cacheDuration = 5 * time.Second // 缓存持续时间
 )
 
 // 定义一个结构体存储系统信息
@@ -36,6 +39,17 @@ type NetworkSpeed struct {
 	LastUpdated time.Time `json:"-"` // 添加 LastUpdated 字段
 }
 
+// 定义一个自定义错误类型
+type systemInfoError struct {
+	message string
+	cause   error
+}
+
+// 为 NetworkSpeed 添加 GetLastUpdated 方法
+func (ns NetworkSpeed) GetLastUpdated() time.Time {
+	return ns.LastUpdated
+}
+
 // 定义一个结构体存储进程信息
 type ProcessInfo struct {
 	Pid         int32     `json:"pid"`
@@ -43,4 +57,9 @@ type ProcessInfo struct {
 	CPUPercent  float64   `json:"cpuPercent"`
 	MemoryUsed  float32   `json:"memoryUsed"` // 内存使用量，单位：MB
 	LastUpdated time.Time `json:"-"`          // 添加 LastUpdated 字段
+}
+
+// 为 ProcessInfo 添加 GetLastUpdated 方法
+func (pi ProcessInfo) GetLastUpdated() time.Time {
+	return pi.LastUpdated
 }

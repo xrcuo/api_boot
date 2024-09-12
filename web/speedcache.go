@@ -1,26 +1,40 @@
 package web
 
 import (
+	"fmt"
+	"reflect"
+	"sync"
 	"time"
 )
 
-// 清理缓存
-func cleanCache() {
-	var ca = time.Duration(conf.Cacheduration) * time.Second
-	// 清理 speedCache
-	speedCache.Range(func(key, value interface{}) bool {
-		// 检查缓存项是否过期
-		if time.Since(value.(NetworkSpeed).LastUpdated) > ca {
-			speedCache.Delete(key)
+// 清理缓存 (使用泛型函数)
+func cleanCache[T any](cache *sync.Map, cacheDuration time.Duration) {
+	cache.Range(func(key, value interface{}) bool {
+		item, ok := value.(T)
+		if !ok {
+			return true // 跳过非预期类型的条目
 		}
-		return true
-	})
 
-	// 清理 processCache
-	processCache.Range(func(key, value interface{}) bool {
-		// 检查缓存项是否过期
-		if time.Since(value.(*ProcessInfo).LastUpdated) > ca {
-			processCache.Delete(key)
+		// 使用反射获取 GetLastUpdated 方法
+		method := reflect.ValueOf(item).MethodByName("GetLastUpdated")
+		if !method.IsValid() {
+			return true // 如果没有该方法，则跳过
+		}
+
+		// 调用 GetLastUpdated 方法获取最后更新时间
+		results := method.Call(nil)
+		if len(results) == 0 {
+			fmt.Println("GetLastUpdated 方法没有返回值")
+			return true
+		}
+		lastUpdated, ok := results[0].Interface().(time.Time)
+		if !ok {
+			fmt.Println("GetLastUpdated 方法返回值类型错误")
+			return true
+		}
+
+		if time.Since(lastUpdated) > cacheDuration {
+			cache.Delete(key)
 		}
 		return true
 	})
