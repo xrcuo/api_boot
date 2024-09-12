@@ -102,8 +102,8 @@ func Ltml() {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			cleanSpeedCache(&speedCache, cacheDuration)
-			cleanProcessCache(&processCache, cacheDuration)
+			cleanCache[NetworkSpeed](&speedCache, cacheDuration, NetworkSpeed.GetLastUpdated)
+			cleanCache[ProcessInfo](&processCache, cacheDuration, ProcessInfo.GetLastUpdated)
 		}
 	}()
 
@@ -163,7 +163,11 @@ func updateSystemInfo() {
 		}
 	}()
 
-	cpuPercent, _ := cpu.Percent(0, false)
+	cpuPercent, err := cpu.Percent(0, false)
+	if err != nil {
+		fmt.Println("获取 CPU 使用率失败:", err)
+		return
+	}
 	memory, _ := mem.VirtualMemory()
 
 	partitions, _ := disk.Partitions(false)
@@ -310,30 +314,15 @@ func getProcessInfo() ([]*ProcessInfo, error) {
 	return processInfos, nil
 }
 
-// 清理 speedCache
-func cleanSpeedCache(cache *sync.Map, cacheDuration time.Duration) {
+// 清理缓存 (使用泛型函数)
+func cleanCache[T any](cache *sync.Map, cacheDuration time.Duration, getLastUpdated func(T) time.Time) {
 	cache.Range(func(key, value interface{}) bool {
-		speed, ok := value.(NetworkSpeed)
+		item, ok := value.(T)
 		if !ok {
-			return true // 跳过非 NetworkSpeed 类型的条目
+			return true // 跳过非预期类型的条目
 		}
 
-		if time.Since(speed.GetLastUpdated()) > cacheDuration {
-			cache.Delete(key)
-		}
-		return true
-	})
-}
-
-// 清理 processCache
-func cleanProcessCache(cache *sync.Map, cacheDuration time.Duration) {
-	cache.Range(func(key, value interface{}) bool {
-		process, ok := value.(ProcessInfo)
-		if !ok {
-			return true // 跳过非 ProcessInfo 类型的条目
-		}
-
-		if time.Since(process.GetLastUpdated()) > cacheDuration {
+		if time.Since(getLastUpdated(item)) > cacheDuration {
 			cache.Delete(key)
 		}
 		return true
