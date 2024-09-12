@@ -47,6 +47,11 @@ type NetworkSpeed struct {
 	LastUpdated time.Time `json:"-"` // 添加 LastUpdated 字段
 }
 
+// 为 NetworkSpeed 添加 GetLastUpdated 方法
+func (ns NetworkSpeed) GetLastUpdated() time.Time {
+	return ns.LastUpdated
+}
+
 // 定义一个结构体存储进程信息
 type ProcessInfo struct {
 	Pid         int32     `json:"pid"`
@@ -54,6 +59,11 @@ type ProcessInfo struct {
 	CPUPercent  float64   `json:"cpuPercent"`
 	MemoryUsed  float32   `json:"memoryUsed"` // 内存使用量，单位：MB
 	LastUpdated time.Time `json:"-"`          // 添加 LastUpdated 字段
+}
+
+// 为 ProcessInfo 添加 GetLastUpdated 方法
+func (pi ProcessInfo) GetLastUpdated() time.Time {
+	return pi.LastUpdated
 }
 
 // 使用 sync.Map 存储每个接口的网络速度信息和进程信息缓存
@@ -92,7 +102,8 @@ func Ltml() {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			cleanCache()
+			cleanSpeedCache(&speedCache, cacheDuration)
+			cleanProcessCache(&processCache, cacheDuration)
 		}
 	}()
 
@@ -174,6 +185,22 @@ func updateSystemInfo() {
 	infoMutex.Unlock()
 }
 
+// 获取之前的网络接口统计信息
+func getPreviousNetworkSpeed(counterName string) (NetworkSpeed, bool) {
+	prevCounter, ok := speedCache.Load(counterName)
+	if !ok {
+		return NetworkSpeed{}, false
+	}
+
+	prevSpeedInfo, ok := prevCounter.(NetworkSpeed)
+	if !ok {
+		fmt.Printf("类型断言失败: %s\n", counterName)
+		return NetworkSpeed{}, false
+	}
+
+	return prevSpeedInfo, true
+}
+
 // 定时更新网络速度信息
 func updateNetworkSpeed() {
 	defer func() {
@@ -204,16 +231,8 @@ func updateNetworkSpeed() {
 		}
 
 		// 获取之前的网络接口统计信息
-		prevCounter, ok := speedCache.Load(counter.Name)
+		prevSpeedInfo, ok := getPreviousNetworkSpeed(counter.Name)
 		if !ok {
-			// 如果不存在之前的统计信息，则跳过
-			continue
-		}
-
-		// 使用类型断言获取之前的 NetworkSpeed 对象
-		prevSpeedInfo, ok := prevCounter.(NetworkSpeed)
-		if !ok {
-			fmt.Printf("类型断言失败: %s\n", counter.Name)
 			continue
 		}
 
@@ -291,22 +310,31 @@ func getProcessInfo() ([]*ProcessInfo, error) {
 	return processInfos, nil
 }
 
-// 清理缓存
-func cleanCache() {
-	// 清理 speedCache
-	speedCache.Range(func(key, value interface{}) bool {
-		// 检查缓存项是否过期
-		if time.Since(value.(NetworkSpeed).LastUpdated) > cacheDuration {
-			speedCache.Delete(key)
+// 清理 speedCache
+func cleanSpeedCache(cache *sync.Map, cacheDuration time.Duration) {
+	cache.Range(func(key, value interface{}) bool {
+		speed, ok := value.(NetworkSpeed)
+		if !ok {
+			return true // 跳过非 NetworkSpeed 类型的条目
+		}
+
+		if time.Since(speed.GetLastUpdated()) > cacheDuration {
+			cache.Delete(key)
 		}
 		return true
 	})
+}
 
-	// 清理 processCache
-	processCache.Range(func(key, value interface{}) bool {
-		// 检查缓存项是否过期
-		if time.Since(value.(*ProcessInfo).LastUpdated) > cacheDuration {
-			processCache.Delete(key)
+// 清理 processCache
+func cleanProcessCache(cache *sync.Map, cacheDuration time.Duration) {
+	cache.Range(func(key, value interface{}) bool {
+		process, ok := value.(ProcessInfo)
+		if !ok {
+			return true // 跳过非 ProcessInfo 类型的条目
+		}
+
+		if time.Since(process.GetLastUpdated()) > cacheDuration {
+			cache.Delete(key)
 		}
 		return true
 	})
