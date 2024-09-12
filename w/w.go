@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net/http"
 	"runtime/debug"
 	"sync"
@@ -19,6 +20,9 @@ import (
 
 //go:embed templates
 var templates embed.FS
+
+//go:embed static
+var staticFiles embed.FS
 
 // 定义一个结构体存储系统信息
 type SystemInfo struct {
@@ -65,6 +69,8 @@ var (
 
 func Ltml() {
 	router := gin.Default()
+	static, _ := fs.Sub(staticFiles, "static")
+	router.StaticFS("/static", http.FS(static))
 
 	templ := template.Must(template.ParseFS(templates, "templates/*"))
 	router.SetHTMLTemplate(templ)
