@@ -7,13 +7,10 @@ import (
 
 // 使用 sync.Map 存储每个接口的网络速度信息和进程信息缓存
 var (
-	speedCache    = sync.Map{} // 使用 sync.Map 存储网络速度信息
-	processCache  = sync.Map{} // 使用 sync.Map 缓存进程信息
-	systemInfo    SystemInfo
-	infoMutex     sync.RWMutex
-	speedUnit     = "kbps" // 默认速度单位
-	updateDelay   = 1 * time.Second
-	cacheDuration = 5 * time.Second // 缓存持续时间
+	speedCache   = sync.Map{} // 使用 sync.Map 存储网络速度信息
+	processCache = sync.Map{} // 使用 sync.Map 缓存进程信息
+	systemInfo   SystemInfo   // 存储系统信息
+	infoMutex    sync.RWMutex // 使用读写锁保护 systemInfo
 )
 
 // 定义一个结构体存储系统信息

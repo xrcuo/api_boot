@@ -32,7 +32,7 @@ func Ltml() {
 	okk := conf.Webui.Flags
 	if okk != "false" {
 		AyaLog.Info("System", "Webui启动服务")
-		go Start()
+		Start()
 
 	} else {
 		AyaLog.Info("System", "Webui停止服务")
@@ -42,8 +42,8 @@ func Ltml() {
 
 func Start() {
 	var (
-	//up = time.Duration(conf.Updatedelay) * time.Second
-	//ca = time.Duration(conf.Cacheduration) * time.Second
+		up = time.Duration(conf.Updatedelay) * time.Second
+		ca = time.Duration(conf.Cacheduration) * time.Second
 	//omain = fmt.Sprintf("%s:%d", conf.Webui.Host, conf.Webui.Port)
 	)
 	router := gin.Default()
@@ -55,7 +55,7 @@ func Start() {
 
 	// 启动 goroutine 定时更新系统信息和网络速度信息
 	go func() {
-		ticker := time.NewTicker(updateDelay)
+		ticker := time.NewTicker(up)
 		defer ticker.Stop()
 
 		for range ticker.C {
@@ -66,12 +66,12 @@ func Start() {
 
 	// 启动 goroutine 定时清理缓存
 	go func() {
-		ticker := time.NewTicker(cacheDuration)
+		ticker := time.NewTicker(ca)
 		defer ticker.Stop()
 
 		for range ticker.C {
-			cleanCache[NetworkSpeed](&speedCache, cacheDuration)
-			cleanCache[ProcessInfo](&processCache, cacheDuration)
+			cleanCache[NetworkSpeed](&speedCache, ca)
+			cleanCache[ProcessInfo](&processCache, ca)
 		}
 	}()
 	router.GET("/", func(c *gin.Context) {
@@ -84,7 +84,7 @@ func Start() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"Interfaces": interfaces,
-			"SpeedUnit":  speedUnit,
+			"SpeedUnit":  conf.Speedunit,
 		})
 	})
 
